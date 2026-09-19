@@ -1,13 +1,97 @@
 import { useState, useEffect, useCallback } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import DashboardPage from './pages/DashboardPage';
+import AdminTestPage from './pages/AdminTestPage';
 
-function App() {
+// Navigation Bar Component with Real-time Auth Status
+function Navbar() {
+  const { user, logout, currentPath, navigate } = useAuth();
+  const currentBase = currentPath.split('?')[0];
+
+  return (
+    <nav className="navbar" aria-label="Main Navigation">
+      <button className="nav-brand" onClick={() => navigate('/')}>
+        <span className="nav-brand-logo" aria-hidden="true">🍕</span>
+        <span className="nav-brand-name">PizzaFlow</span>
+      </button>
+
+      <div className="nav-links">
+        <button
+          className={`nav-btn ${currentBase === '/' ? 'active' : ''}`}
+          onClick={() => navigate('/')}
+        >
+          Platform Home
+        </button>
+
+        {user ? (
+          <>
+            <button
+              className={`nav-btn ${currentBase === '/dashboard' ? 'active' : ''}`}
+              onClick={() => navigate('/dashboard')}
+            >
+              Dashboard
+            </button>
+            {user.role === 'admin' && (
+              <button
+                className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
+                style={{ color: '#f87171' }}
+                onClick={() => navigate('/admin/test')}
+              >
+                Admin Console
+              </button>
+            )}
+            <div className="user-profile-pill" onClick={() => navigate('/dashboard')}>
+              <span>👤</span>
+              <span>{user.name}</span>
+              <span className={`role-tag ${user.role}`}>{user.role}</span>
+            </div>
+            <button className="nav-btn" onClick={logout}>
+              Log Out
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className={`nav-btn ${currentBase === '/login' ? 'active' : ''}`}
+              onClick={() => navigate('/login')}
+            >
+              Sign In
+            </button>
+            <button
+              className={`nav-btn nav-btn-primary ${currentBase === '/register' ? 'active' : ''}`}
+              onClick={() => navigate('/register')}
+            >
+              Register
+            </button>
+            <button
+              className={`nav-btn ${currentBase === '/admin/login' ? 'active' : ''}`}
+              style={{ color: '#fca5a5', border: '1px solid rgba(230,57,70,0.3)' }}
+              onClick={() => navigate('/admin/login')}
+            >
+              🛡️ Admin
+            </button>
+          </>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// Foundation Home View (Step 3 + Step 4 status)
+function HomeView() {
+  const { navigate } = useAuth();
   const [healthData, setHealthData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [latency, setLatency] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
 
-  // Backend API URL from environment or default port 5000
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const checkHealth = useCallback(async () => {
@@ -43,21 +127,7 @@ function App() {
   const isConnected = !!healthData && healthData.status === 'online';
 
   return (
-    <div className="app-container">
-      {/* Header Bar */}
-      <header className="header">
-        <div className="brand-badge">
-          <div className="brand-icon" aria-hidden="true">🍕</div>
-          <div className="brand-info">
-            <h1>PizzaFlow</h1>
-            <p>Delivery &amp; Inventory Management Platform</p>
-          </div>
-        </div>
-        <div className="phase-pill">
-          Step 3: Foundation
-        </div>
-      </header>
-
+    <>
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-tag">
@@ -67,8 +137,16 @@ function App() {
           Robust Foundation for <span className="hero-highlight">Scalable Pizza Logistics</span>
         </h2>
         <p className="hero-subtitle">
-          Engineered with React, Node.js, Express, and MongoDB. Real-time connectivity verified and primed for module expansion.
+          Engineered with React, Node.js, Express, and MongoDB. Secure JWT authentication, role authorization, and email verification active.
         </p>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/register')}>
+            Explore User Registration
+          </button>
+          <button className="submit-btn admin-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/admin/login')}>
+            Test Admin Authorization
+          </button>
+        </div>
       </section>
 
       {/* Backend Health & Connectivity Monitor */}
@@ -120,17 +198,15 @@ function App() {
             </span>
           </div>
 
-          {/* CORS & Network Status */}
+          {/* Authentication System Status */}
           <div className="status-item">
-            <span className="status-item-label">CORS Pipeline</span>
+            <span className="status-item-label">Auth Engine</span>
             <div className="status-badge-row">
-              <span className={`pulse-dot ${isConnected ? 'online' : 'warning'}`} />
-              <span className="status-value">
-                {isConnected ? 'Authorized' : 'Checking'}
-              </span>
+              <span className="pulse-dot online" />
+              <span className="status-value">Active</span>
             </div>
             <span className="status-detail">
-              Client &harr; Server handshake OK
+              JWT &bull; Bcrypt &bull; Nodemailer
             </span>
           </div>
 
@@ -170,24 +246,24 @@ function App() {
         {/* Architecture Specs */}
         <section className="card" aria-labelledby="tech-stack-title">
           <h3 id="tech-stack-title" className="section-card-title">
-            <span>⚙️</span> Foundation Tech Stack
+            <span>⚙️</span> Authentication &amp; Platform Stack
           </h3>
           <div className="tech-list">
             <div className="tech-item">
-              <span className="tech-name"><span>⚛️</span> React.js (Vite)</span>
-              <span className="tech-role">Frontend Client</span>
+              <span className="tech-name"><span>🔐</span> JWT &amp; HTTP-Only Cookie</span>
+              <span className="tech-role">Stateless Auth</span>
             </div>
             <div className="tech-item">
-              <span className="tech-name"><span>🟢</span> Node.js &amp; Express</span>
-              <span className="tech-role">REST API Server</span>
+              <span className="tech-name"><span>🛡️</span> Bcrypt.js Hashing</span>
+              <span className="tech-role">Salted Passwords</span>
             </div>
             <div className="tech-item">
-              <span className="tech-name"><span>🍃</span> MongoDB &amp; Mongoose</span>
-              <span className="tech-role">Database &amp; ODM</span>
+              <span className="tech-name"><span>📧</span> Nodemailer Service</span>
+              <span className="tech-role">Email Verification</span>
             </div>
             <div className="tech-item">
-              <span className="tech-name"><span>🛡️</span> CORS &amp; Dotenv</span>
-              <span className="tech-role">Security &amp; Config</span>
+              <span className="tech-name"><span>👑</span> Role Authorization</span>
+              <span className="tech-role">User / Admin Guard</span>
             </div>
           </div>
         </section>
@@ -203,10 +279,10 @@ function App() {
               <span>Step 3: Core Foundation Setup</span>
               <span className="roadmap-tag ready">Complete</span>
             </div>
-            <div className="roadmap-item">
-              <span className="roadmap-status-dot pending" />
-              <span>Step 4: User Authentication &amp; Email Verification</span>
-              <span className="roadmap-tag upcoming">Upcoming</span>
+            <div className="roadmap-item current">
+              <span className="roadmap-status-dot active" />
+              <span>Step 4: User &amp; Admin Authentication (4A-4I)</span>
+              <span className="roadmap-tag ready">Complete</span>
             </div>
             <div className="roadmap-item">
               <span className="roadmap-status-dot pending" />
@@ -231,15 +307,58 @@ function App() {
           </div>
         </section>
       </div>
+    </>
+  );
+}
 
-      {/* Footer */}
+// Router & Route Dispatcher
+function AppContent() {
+  const { currentPath } = useAuth();
+  const basePath = currentPath.split('?')[0];
+
+  const renderRoute = () => {
+    switch (basePath) {
+      case '/login':
+        return <LoginPage />;
+      case '/register':
+        return <RegisterPage />;
+      case '/admin/login':
+        return <AdminLoginPage />;
+      case '/forgot-password':
+        return <ForgotPasswordPage />;
+      case '/reset-password':
+        return <ResetPasswordPage />;
+      case '/verify-email':
+        return <VerifyEmailPage />;
+      case '/dashboard':
+        return <DashboardPage />;
+      case '/admin/test':
+        return <AdminTestPage />;
+      case '/':
+      default:
+        return <HomeView />;
+    }
+  };
+
+  return (
+    <div className="app-container">
+      <Navbar />
+      <main>
+        {renderRoute()}
+      </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management App &bull; Built with <span>React &amp; Express</span> &bull; Step 3 Foundation
+          Pizza Delivery &amp; Inventory Management Platform &bull; Step 4 Authentication &bull; Built with <span>React &amp; Express</span>
         </p>
       </footer>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
