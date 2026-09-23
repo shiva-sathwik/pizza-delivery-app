@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider, useCart } from './context/CartContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminLoginPage from './pages/AdminLoginPage';
@@ -8,10 +9,14 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminTestPage from './pages/AdminTestPage';
+import MenuPage from './pages/MenuPage';
+import CustomPizzaPage from './pages/CustomPizzaPage';
+import CartPage from './pages/CartPage';
 
-// Navigation Bar Component with Real-time Auth Status
+// Navigation Bar Component with Real-time Auth Status & Cart Badge
 function Navbar() {
   const { user, logout, currentPath, navigate } = useAuth();
+  const { cart } = useCart();
   const currentBase = currentPath.split('?')[0];
 
   return (
@@ -26,7 +31,31 @@ function Navbar() {
           className={`nav-btn ${currentBase === '/' ? 'active' : ''}`}
           onClick={() => navigate('/')}
         >
-          Platform Home
+          Home
+        </button>
+
+        <button
+          className={`nav-btn ${currentBase === '/menu' ? 'active' : ''}`}
+          onClick={() => navigate('/menu')}
+        >
+          Menu
+        </button>
+
+        <button
+          className={`nav-btn ${currentBase === '/custom-pizza' ? 'active' : ''}`}
+          onClick={() => navigate('/custom-pizza')}
+        >
+          Custom Builder
+        </button>
+
+        <button
+          className={`nav-btn nav-cart-btn ${currentBase === '/cart' ? 'active' : ''}`}
+          onClick={() => navigate('/cart')}
+        >
+          <span>🛒 Cart</span>
+          {cart && cart.totalItems > 0 && (
+            <span className="nav-cart-badge">{cart.totalItems}</span>
+          )}
         </button>
 
         {user ? (
@@ -140,11 +169,14 @@ function HomeView() {
           Engineered with React, Node.js, Express, and MongoDB. Secure JWT authentication, role authorization, and email verification active.
         </p>
         <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/register')}>
-            Explore User Registration
+          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/menu')}>
+            🍕 Browse Pizza Menu
+          </button>
+          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem', background: 'linear-gradient(135deg, #2563eb, #3b82f6)' }} onClick={() => navigate('/custom-pizza')}>
+            ✨ Custom Pizza Builder
           </button>
           <button className="submit-btn admin-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/admin/login')}>
-            Test Admin Authorization
+            🛡️ Admin Console
           </button>
         </div>
       </section>
@@ -284,10 +316,10 @@ function HomeView() {
               <span>Step 4: User &amp; Admin Authentication (4A-4I)</span>
               <span className="roadmap-tag ready">Complete</span>
             </div>
-            <div className="roadmap-item">
-              <span className="roadmap-status-dot pending" />
-              <span>Step 5: Pizza Catalog &amp; Custom Pizza Builder</span>
-              <span className="roadmap-tag upcoming">Upcoming</span>
+            <div className="roadmap-item current">
+              <span className="roadmap-status-dot active" />
+              <span>Step 5: Pizza Catalog &amp; Custom Pizza Builder &amp; Cart</span>
+              <span className="roadmap-tag ready">Complete</span>
             </div>
             <div className="roadmap-item">
               <span className="roadmap-status-dot pending" />
@@ -318,6 +350,12 @@ function AppContent() {
 
   const renderRoute = () => {
     switch (basePath) {
+      case '/menu':
+        return <MenuPage />;
+      case '/custom-pizza':
+        return <CustomPizzaPage />;
+      case '/cart':
+        return <CartPage />;
       case '/login':
         return <LoginPage />;
       case '/register':
@@ -348,7 +386,7 @@ function AppContent() {
       </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management Platform &bull; Step 4 Authentication &bull; Built with <span>React &amp; Express</span>
+          Pizza Delivery &amp; Inventory Management Platform &bull; Step 5 Catalog &amp; Cart Foundation &bull; Built with <span>React &amp; Express</span>
         </p>
       </footer>
     </div>
@@ -358,7 +396,9 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </AuthProvider>
   );
 }

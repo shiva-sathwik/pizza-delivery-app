@@ -8,6 +8,8 @@ const connectDB = require('./config/db');
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
+const pizzaRoutes = require('./routes/pizza.routes');
+const cartRoutes = require('./routes/cart.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +33,8 @@ app.use(cookieParser());
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/pizzas', pizzaRoutes);
+app.use('/api/cart', cartRoutes);
 
 // Root route welcome message
 app.get('/', (req, res) => {
@@ -38,7 +42,9 @@ app.get('/', (req, res) => {
     message: 'Welcome to the Pizza Delivery & Inventory Management API',
     healthCheck: '/api/health',
     authEndpoints: '/api/auth',
-    adminEndpoints: '/api/admin'
+    adminEndpoints: '/api/admin',
+    pizzaEndpoints: '/api/pizzas',
+    cartEndpoints: '/api/cart'
   });
 });
 
