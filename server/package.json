@@ -6,10 +6,13 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "node tests/auth.test.js && node tests/pizza-cart.test.js && node tests/inventory.test.js",
     "test:auth": "node tests/auth.test.js",
     "test:pizza-cart": "node tests/pizza-cart.test.js",
+    "test:inventory": "node tests/inventory.test.js",
     "seed:admin": "node utils/seedAdmin.js",
-    "seed:pizzas": "node utils/seedPizzas.js"
+    "seed:pizzas": "node utils/seedPizzas.js",
+    "seed:inventory": "node utils/seedInventory.js"
   },
   "keywords": [
     "pizza-delivery",

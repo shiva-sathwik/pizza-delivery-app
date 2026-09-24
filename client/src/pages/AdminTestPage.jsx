@@ -92,7 +92,14 @@ export default function AdminTestPage() {
             Testing Step 4F &amp; 4G: Role-based Authorization Middleware (`requireAdmin`)
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            className="refresh-btn"
+            style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
+            onClick={() => navigate('/admin/inventory')}
+          >
+            📦 Inventory Management
+          </button>
           <button className="refresh-btn" onClick={runAdminTest} disabled={loading}>
             {loading ? 'Pinging...' : 'Test GET /api/admin/test'}
           </button>

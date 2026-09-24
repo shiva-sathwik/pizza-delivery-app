@@ -9,6 +9,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminTestPage from './pages/AdminTestPage';
+import AdminInventoryPage from './pages/AdminInventoryPage';
 import MenuPage from './pages/MenuPage';
 import CustomPizzaPage from './pages/CustomPizzaPage';
 import CartPage from './pages/CartPage';
@@ -67,13 +68,22 @@ function Navbar() {
               Dashboard
             </button>
             {user.role === 'admin' && (
-              <button
-                className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
-                style={{ color: '#f87171' }}
-                onClick={() => navigate('/admin/test')}
-              >
-                Admin Console
-              </button>
+              <>
+                <button
+                  className={`nav-btn ${currentBase === '/admin/inventory' ? 'active' : ''}`}
+                  style={{ color: '#fb923c' }}
+                  onClick={() => navigate('/admin/inventory')}
+                >
+                  📦 Inventory
+                </button>
+                <button
+                  className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
+                  style={{ color: '#f87171' }}
+                  onClick={() => navigate('/admin/test')}
+                >
+                  Admin Console
+                </button>
+              </>
             )}
             <div className="user-profile-pill" onClick={() => navigate('/dashboard')}>
               <span>👤</span>
@@ -370,6 +380,8 @@ function AppContent() {
         return <VerifyEmailPage />;
       case '/dashboard':
         return <DashboardPage />;
+      case '/admin/inventory':
+        return <AdminInventoryPage />;
       case '/admin/test':
         return <AdminTestPage />;
       case '/':
@@ -386,7 +398,7 @@ function AppContent() {
       </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management Platform &bull; Step 5 Catalog &amp; Cart Foundation &bull; Built with <span>React &amp; Express</span>
+          Pizza Delivery &amp; Inventory Management Platform &bull; Step 6 Inventory &amp; Admin Foundation &bull; Built with <span>React &amp; Express</span>
         </p>
       </footer>
     </div>

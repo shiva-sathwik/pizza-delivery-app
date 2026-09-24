@@ -90,13 +90,22 @@ export default function DashboardPage() {
           View Platform Foundation
         </button>
         {user.role === 'admin' && (
-          <button
-            className="submit-btn admin-btn"
-            style={{ flex: 1 }}
-            onClick={() => navigate('/admin/test')}
-          >
-            Go to Admin Test Endpoint
-          </button>
+          <>
+            <button
+              className="submit-btn"
+              style={{ flex: 1, background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
+              onClick={() => navigate('/admin/inventory')}
+            >
+              📦 Manage Inventory
+            </button>
+            <button
+              className="submit-btn admin-btn"
+              style={{ flex: 1 }}
+              onClick={() => navigate('/admin/test')}
+            >
+              Go to Admin Test Endpoint
+            </button>
+          </>
         )}
       </div>
     </div>

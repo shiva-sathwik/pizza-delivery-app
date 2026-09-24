@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const pizzaRoutes = require('./routes/pizza.routes');
 const cartRoutes = require('./routes/cart.routes');
+const inventoryRoutes = require('./routes/inventory.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/pizzas', pizzaRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Root route welcome message
 app.get('/', (req, res) => {
@@ -44,7 +46,8 @@ app.get('/', (req, res) => {
     authEndpoints: '/api/auth',
     adminEndpoints: '/api/admin',
     pizzaEndpoints: '/api/pizzas',
-    cartEndpoints: '/api/cart'
+    cartEndpoints: '/api/cart',
+    inventoryEndpoints: '/api/inventory'
   });
 });
 
@@ -54,6 +57,7 @@ app.listen(PORT, () => {
   console.log(`[Server] Health check available at: http://localhost:${PORT}/api/health`);
   console.log(`[Server] Auth routes registered at: http://localhost:${PORT}/api/auth`);
   console.log(`[Server] Admin routes registered at: http://localhost:${PORT}/api/admin`);
+  console.log(`[Server] Inventory routes registered at: http://localhost:${PORT}/api/inventory`);
   console.log(`[Server] Accepting CORS requests from: ${CLIENT_URL}`);
 });
 
