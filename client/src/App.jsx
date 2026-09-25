@@ -10,6 +10,9 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminTestPage from './pages/AdminTestPage';
 import AdminInventoryPage from './pages/AdminInventoryPage';
+import OrdersPage from './pages/OrdersPage';
+import OrderTrackingPage from './pages/OrderTrackingPage';
+import AdminOrdersPage from './pages/AdminOrdersPage';
 import MenuPage from './pages/MenuPage';
 import CustomPizzaPage from './pages/CustomPizzaPage';
 import CartPage from './pages/CartPage';
@@ -67,6 +70,12 @@ function Navbar() {
             >
               Dashboard
             </button>
+            <button
+              className={`nav-btn ${currentBase === '/orders' ? 'active' : ''}`}
+              onClick={() => navigate('/orders')}
+            >
+              📋 My Orders
+            </button>
             {user.role === 'admin' && (
               <>
                 <button
@@ -75,6 +84,13 @@ function Navbar() {
                   onClick={() => navigate('/admin/inventory')}
                 >
                   📦 Inventory
+                </button>
+                <button
+                  className={`nav-btn ${currentBase === '/admin/orders' ? 'active' : ''}`}
+                  style={{ color: '#38bdf8' }}
+                  onClick={() => navigate('/admin/orders')}
+                >
+                  📋 Orders
                 </button>
                 <button
                   className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
@@ -380,12 +396,22 @@ function AppContent() {
         return <VerifyEmailPage />;
       case '/dashboard':
         return <DashboardPage />;
+      case '/orders':
+        return <OrdersPage />;
       case '/admin/inventory':
         return <AdminInventoryPage />;
+      case '/admin/orders':
+        return <AdminOrdersPage />;
       case '/admin/test':
         return <AdminTestPage />;
       case '/':
       default:
+        if (basePath.startsWith('/orders/')) {
+          return <OrderTrackingPage />;
+        }
+        if (basePath.startsWith('/admin/orders/')) {
+          return <AdminOrdersPage />;
+        }
         return <HomeView />;
     }
   };
@@ -398,7 +424,7 @@ function AppContent() {
       </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management Platform &bull; Step 6 Inventory &amp; Admin Foundation &bull; Built with <span>React &amp; Express</span>
+          Pizza Delivery &amp; Inventory Management Platform &bull; Step 7 Order Processing, Payments &amp; Tracking &bull; Built with <span>React &amp; Express</span>
         </p>
       </footer>
     </div>
