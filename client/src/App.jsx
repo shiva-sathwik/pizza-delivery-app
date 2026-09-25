@@ -13,6 +13,7 @@ import AdminInventoryPage from './pages/AdminInventoryPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderTrackingPage from './pages/OrderTrackingPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import MenuPage from './pages/MenuPage';
 import CustomPizzaPage from './pages/CustomPizzaPage';
 import CartPage from './pages/CartPage';
@@ -91,6 +92,13 @@ function Navbar() {
                   onClick={() => navigate('/admin/orders')}
                 >
                   📋 Orders
+                </button>
+                <button
+                  className={`nav-btn ${currentBase === '/admin/analytics' ? 'active' : ''}`}
+                  style={{ color: '#a78bfa' }}
+                  onClick={() => navigate('/admin/analytics')}
+                >
+                  📊 Analytics
                 </button>
                 <button
                   className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
@@ -344,23 +352,23 @@ function HomeView() {
             </div>
             <div className="roadmap-item current">
               <span className="roadmap-status-dot active" />
-              <span>Step 5: Pizza Catalog &amp; Custom Pizza Builder &amp; Cart</span>
+              <span>Step 5: Pizza Catalog &amp; Custom Builder &amp; Cart</span>
               <span className="roadmap-tag ready">Complete</span>
             </div>
-            <div className="roadmap-item">
-              <span className="roadmap-status-dot pending" />
-              <span>Step 6: Orders &amp; Razorpay Payments</span>
-              <span className="roadmap-tag upcoming">Upcoming</span>
+            <div className="roadmap-item current">
+              <span className="roadmap-status-dot active" />
+              <span>Step 6: Inventory &amp; Admin Management</span>
+              <span className="roadmap-tag ready">Complete</span>
             </div>
-            <div className="roadmap-item">
-              <span className="roadmap-status-dot pending" />
-              <span>Step 7: Inventory Management &amp; Stock Alerts</span>
-              <span className="roadmap-tag upcoming">Upcoming</span>
+            <div className="roadmap-item current">
+              <span className="roadmap-status-dot active" />
+              <span>Step 7: Orders, Razorpay Checkout &amp; Tracking</span>
+              <span className="roadmap-tag ready">Complete</span>
             </div>
-            <div className="roadmap-item">
-              <span className="roadmap-status-dot pending" />
-              <span>Step 8: Real-Time Order Tracking (Socket.IO)</span>
-              <span className="roadmap-tag upcoming">Upcoming</span>
+            <div className="roadmap-item current">
+              <span className="roadmap-status-dot active" />
+              <span>Step 8: Low-Stock Alerts, Analytics &amp; Recommendations</span>
+              <span className="roadmap-tag ready">Complete</span>
             </div>
           </div>
         </section>
@@ -402,6 +410,8 @@ function AppContent() {
         return <AdminInventoryPage />;
       case '/admin/orders':
         return <AdminOrdersPage />;
+      case '/admin/analytics':
+        return <AdminAnalyticsPage />;
       case '/admin/test':
         return <AdminTestPage />;
       case '/':
@@ -424,7 +434,7 @@ function AppContent() {
       </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management Platform &bull; Step 7 Order Processing, Payments &amp; Tracking &bull; Built with <span>React &amp; Express</span>
+          Pizza Delivery &amp; Inventory Management Platform &bull; Step 8 Analytics, Smart Alerts &amp; Recommendations &bull; Built with <span>React &amp; Express</span>
         </p>
       </footer>
     </div>

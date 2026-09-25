@@ -30,6 +30,15 @@ const inventorySchema = new mongoose.Schema(
       required: [true, 'Threshold is required'],
       min: [0, 'Threshold cannot be negative'],
       default: 5
+    },
+    lastAlertSentAt: {
+      type: Date,
+      default: null
+    },
+    lastAlertStatus: {
+      type: String,
+      enum: ['In Stock', 'Low Stock', 'Out of Stock', null],
+      default: null
     }
   },
   {

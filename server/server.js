@@ -13,6 +13,7 @@ const cartRoutes = require('./routes/cart.routes');
 const inventoryRoutes = require('./routes/inventory.routes');
 const orderRoutes = require('./routes/order.routes');
 const adminOrderRoutes = require('./routes/admin.order.routes');
+const { startInventoryAlertCron } = require('./utils/inventoryAlertCron');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,9 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize automated low-stock inventory alert cron
+startInventoryAlertCron();
 
 // Middleware: Enable CORS for React frontend with credentials
 app.use(cors({

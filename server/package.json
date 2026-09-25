@@ -6,11 +6,13 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/auth.test.js && node tests/pizza-cart.test.js && node tests/inventory.test.js && node tests/order.test.js",
+    "test": "node tests/auth.test.js && node tests/pizza-cart.test.js && node tests/inventory.test.js && node tests/order.test.js && node tests/analytics.test.js && node tests/inventory-alert.test.js",
     "test:auth": "node tests/auth.test.js",
     "test:pizza-cart": "node tests/pizza-cart.test.js",
     "test:inventory": "node tests/inventory.test.js",
     "test:order": "node tests/order.test.js",
+    "test:analytics": "node tests/analytics.test.js",
+    "test:inventory-alert": "node tests/inventory-alert.test.js",
     "seed:admin": "node utils/seedAdmin.js",
     "seed:pizzas": "node utils/seedPizzas.js",
     "seed:inventory": "node utils/seedInventory.js"
@@ -32,6 +34,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.1",
+    "node-cron": "^4.6.0",
     "nodemailer": "^10.0.10",
     "razorpay": "^2.9.8"
   }
