@@ -17,6 +17,8 @@ import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import MenuPage from './pages/MenuPage';
 import CustomPizzaPage from './pages/CustomPizzaPage';
 import CartPage from './pages/CartPage';
+import HomePage from './pages/HomePage';
+import { API_BASE } from './services/api';
 
 // Navigation Bar Component with Real-time Auth Status & Cart Badge
 function Navbar() {
@@ -80,29 +82,25 @@ function Navbar() {
             {user.role === 'admin' && (
               <>
                 <button
-                  className={`nav-btn ${currentBase === '/admin/inventory' ? 'active' : ''}`}
-                  style={{ color: '#fb923c' }}
+                  className={`nav-btn nav-btn-admin ${currentBase === '/admin/inventory' ? 'active' : ''}`}
                   onClick={() => navigate('/admin/inventory')}
                 >
                   📦 Inventory
                 </button>
                 <button
-                  className={`nav-btn ${currentBase === '/admin/orders' ? 'active' : ''}`}
-                  style={{ color: '#38bdf8' }}
+                  className={`nav-btn nav-btn-admin ${currentBase === '/admin/orders' ? 'active' : ''}`}
                   onClick={() => navigate('/admin/orders')}
                 >
                   📋 Orders
                 </button>
                 <button
-                  className={`nav-btn ${currentBase === '/admin/analytics' ? 'active' : ''}`}
-                  style={{ color: '#a78bfa' }}
+                  className={`nav-btn nav-btn-admin ${currentBase === '/admin/analytics' ? 'active' : ''}`}
                   onClick={() => navigate('/admin/analytics')}
                 >
                   📊 Analytics
                 </button>
                 <button
-                  className={`nav-btn ${currentBase === '/admin/test' ? 'active' : ''}`}
-                  style={{ color: '#f87171' }}
+                  className={`nav-btn nav-btn-admin ${currentBase === '/admin/test' ? 'active' : ''}`}
                   onClick={() => navigate('/admin/test')}
                 >
                   Admin Console
@@ -133,8 +131,7 @@ function Navbar() {
               Register
             </button>
             <button
-              className={`nav-btn ${currentBase === '/admin/login' ? 'active' : ''}`}
-              style={{ color: '#fca5a5', border: '1px solid rgba(230,57,70,0.3)' }}
+              className={`nav-btn nav-btn-admin-login ${currentBase === '/admin/login' ? 'active' : ''}`}
               onClick={() => navigate('/admin/login')}
             >
               🛡️ Admin
@@ -155,15 +152,13 @@ function HomeView() {
   const [latency, setLatency] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
   const checkHealth = useCallback(async () => {
     setLoading(true);
     setError(null);
     const startTime = performance.now();
 
     try {
-      const response = await fetch(`${API_URL}/health`);
+      const response = await fetch(`${API_BASE}/health`);
       const elapsed = Math.round(performance.now() - startTime);
       setLatency(elapsed);
 
@@ -181,7 +176,7 @@ function HomeView() {
     } finally {
       setLoading(false);
     }
-  }, [API_URL]);
+  }, []);
 
   useEffect(() => {
     checkHealth();
@@ -206,7 +201,7 @@ function HomeView() {
           <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/menu')}>
             🍕 Browse Pizza Menu
           </button>
-          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem', background: 'linear-gradient(135deg, #2563eb, #3b82f6)' }} onClick={() => navigate('/custom-pizza')}>
+          <button className="submit-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem', background: 'var(--color-sage)' }} onClick={() => navigate('/custom-pizza')}>
             ✨ Custom Pizza Builder
           </button>
           <button className="submit-btn admin-btn" style={{ padding: '0.75rem 1.5rem', fontSize: '0.9rem' }} onClick={() => navigate('/admin/login')}>
@@ -295,7 +290,7 @@ function HomeView() {
           <div className="endpoint-header">
             <div className="endpoint-tag">
               <span className="method-get">GET</span>
-              <span>{API_URL}/health</span>
+              <span>{API_BASE}/health</span>
             </div>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Response Status: {isConnected ? '200 OK' : error ? 'Error' : 'Pending'}
@@ -379,7 +374,7 @@ function HomeView() {
 
 // Router & Route Dispatcher
 function AppContent() {
-  const { currentPath } = useAuth();
+  const { currentPath, navigate } = useAuth();
   const basePath = currentPath.split('?')[0];
 
   const renderRoute = () => {
@@ -414,6 +409,8 @@ function AppContent() {
         return <AdminAnalyticsPage />;
       case '/admin/test':
         return <AdminTestPage />;
+      case '/dev-panel':
+        return <HomeView />;
       case '/':
       default:
         if (basePath.startsWith('/orders/')) {
@@ -422,7 +419,7 @@ function AppContent() {
         if (basePath.startsWith('/admin/orders/')) {
           return <AdminOrdersPage />;
         }
-        return <HomeView />;
+        return <HomePage />;
     }
   };
 
@@ -434,7 +431,14 @@ function AppContent() {
       </main>
       <footer className="footer">
         <p>
-          Pizza Delivery &amp; Inventory Management Platform &bull; Step 8 Analytics, Smart Alerts &amp; Recommendations &bull; Built with <span>React &amp; Express</span>
+          🍕 PizzaFlow &bull; Artisan Pizza Delivery &amp; Inventory Management &bull; Built with <span>React &amp; Express</span> &bull;{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/dev-panel')}
+            className="footer-dev-btn"
+          >
+            Architecture Panel
+          </button>
         </p>
       </footer>
     </div>

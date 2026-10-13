@@ -31,10 +31,11 @@
  * 22. Identical catalog items merge correctly
  * 23. Different custom configurations remain separate
  *
- * SECURITY & ISOLATION (24-26):
+ * SECURITY & ISOLATION (24-27):
  * 24. User A cannot access User B's cart
  * 25. User A cannot modify User B's cart item
  * 26. User A cannot delete User B's cart item
+ * 27. User cart resolves correctly when req.user contains id instead of _id
  */
 
 const assert = require('assert');
@@ -753,6 +754,43 @@ async function runStep5Tests() {
     reportTest("User B cannot delete User A's cart item (returns 404)", true);
   } catch (err) {
     reportTest("User A cannot delete User B's cart item", false, err.message);
+  }
+
+  // Test 27: User cart resolves correctly when req.user contains id instead of _id
+  try {
+    const userWithOnlyId = {
+      id: new mongoose.Types.ObjectId(),
+      name: 'Plain Object User',
+      email: 'plain@example.com',
+      role: 'user'
+    };
+
+    const cartData = wrapCartDoc({
+      user: userWithOnlyId.id,
+      items: [
+        {
+          type: 'catalog',
+          name: 'Rustic Farmhouse',
+          price: 399,
+          quantity: 1,
+          base: 'Pan Crust',
+          sauce: 'Classic San Marzano Tomato',
+          cheese: '100% Mozzarella'
+        }
+      ]
+    });
+    cartDB.set(userWithOnlyId.id.toString(), cartData);
+
+    const { req, res } = createMockReqRes({ user: userWithOnlyId });
+    await getCart(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.jsonData.success, true);
+    assert.strictEqual(res.jsonData.data.items.length, 1);
+    assert.strictEqual(res.jsonData.data.items[0].name, 'Rustic Farmhouse');
+    assert.strictEqual(res.jsonData.data.subtotal, 399);
+    reportTest('User cart resolves correctly when req.user contains id instead of _id', true);
+  } catch (err) {
+    reportTest('User cart resolves correctly when req.user contains id instead of _id', false, err.message);
   }
 
   console.log('\n====================================================');

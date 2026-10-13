@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { API_BASE } from '../services/api';
 
 // Default fallback options if network is slow
 const DEFAULT_INGREDIENTS = {
@@ -50,8 +51,6 @@ export default function CustomPizzaPage() {
   const [statusMessage, setStatusMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
   useEffect(() => {
     const loadIngredients = async () => {
       try {
@@ -67,7 +66,7 @@ export default function CustomPizzaPage() {
       }
     };
     loadIngredients();
-  }, [API_BASE]);
+  }, []);
 
   // Toggle vegetable selection
   const handleToggleVegetable = (vegName) => {

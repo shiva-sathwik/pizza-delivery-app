@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 export default function VerifyEmailPage() {
   const { navigate } = useAuth();
   const [status, setStatus] = useState('verifying'); // 'verifying', 'success', 'error'
   const [message, setMessage] = useState('');
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -30,14 +29,14 @@ export default function VerifyEmailPage() {
           setStatus('error');
           setMessage(data.message || 'Verification token is invalid, expired, or has already been used.');
         }
-      } catch (err) {
+      } catch {
         setStatus('error');
         setMessage('Failed to connect to the server to verify your email.');
       }
     };
 
     verifyToken();
-  }, [API_BASE]);
+  }, []);
 
   return (
     <div className="auth-card card">

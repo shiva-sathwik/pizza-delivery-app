@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 const STAGES = [
   {
@@ -30,7 +31,6 @@ export default function OrderTrackingPage() {
   const [lastPolled, setLastPolled] = useState(null);
 
   const pollIntervalRef = useRef(null);
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // Extract order ID from current pathname (/orders/:id)
   const pathParts = currentPath.split('?')[0].split('/');
@@ -74,7 +74,7 @@ export default function OrderTrackingPage() {
         if (!isPolling) setLoading(false);
       }
     },
-    [orderId, API_BASE]
+    [orderId]
   );
 
   // Initial fetch and start 5-second polling

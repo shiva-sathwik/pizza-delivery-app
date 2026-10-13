@@ -60,7 +60,7 @@ const aggregateIngredientRequirements = (items) => {
  */
 const createPaymentOrder = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
 
     // 1. Retrieve user's cart
     const cart = await Cart.findOne({ user: userId });
@@ -161,7 +161,7 @@ const createPaymentOrder = async (req, res) => {
 const verifyPaymentAndCreateOrder = async (req, res) => {
   let session = null;
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -394,7 +394,8 @@ const verifyPaymentAndCreateOrder = async (req, res) => {
  */
 const getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const userId = req.user._id || req.user.id;
+    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
     return res.status(200).json({
       success: true,
       count: orders.length,
@@ -435,7 +436,8 @@ const getUserOrderById = async (req, res) => {
     }
 
     // Security Isolation: User can only access their own order
-    if (order.user.toString() !== req.user._id.toString()) {
+    const userId = (req.user._id || req.user.id).toString();
+    if (order.user.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Access denied: You do not have permission to view this order'

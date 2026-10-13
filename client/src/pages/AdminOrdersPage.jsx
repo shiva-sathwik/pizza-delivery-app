@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 export default function AdminOrdersPage() {
   const { user, navigate } = useAuth();
@@ -9,8 +10,6 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [updatingId, setUpdatingId] = useState(null);
   const [actionFeedback, setActionFeedback] = useState({});
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const fetchOrders = useCallback(async () => {
     if (!user || user.role !== 'admin') return;
@@ -35,7 +34,7 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, API_BASE]);
+  }, [user]);
 
   useEffect(() => {
     fetchOrders();
@@ -230,12 +229,12 @@ export default function AdminOrdersPage() {
           <div className="metric-subtext">Awaiting kitchen prep</div>
         </div>
 
-        <div className="metric-card" style={{ borderLeft: '4px solid #3b82f6' }}>
+        <div className="metric-card" style={{ borderLeft: '4px solid var(--color-sage)' }}>
           <div className="metric-header">
             <span className="metric-title">In Kitchen</span>
             <span className="metric-icon">👨‍🍳</span>
           </div>
-          <div className="metric-value" style={{ color: '#60a5fa' }}>
+          <div className="metric-value" style={{ color: 'var(--color-forest)' }}>
             {metrics.kitchen}
           </div>
           <div className="metric-subtext">Currently baking</div>
@@ -252,12 +251,12 @@ export default function AdminOrdersPage() {
           <div className="metric-subtext">En route to customers</div>
         </div>
 
-        <div className="metric-card" style={{ borderLeft: '4px solid #10b981' }}>
+        <div className="metric-card" style={{ borderLeft: '4px solid var(--color-forest)' }}>
           <div className="metric-header">
             <span className="metric-title">Total Revenue</span>
             <span className="metric-icon">💰</span>
           </div>
-          <div className="metric-value" style={{ color: '#34d399' }}>
+          <div className="metric-value" style={{ color: 'var(--color-forest)' }}>
             ₹{metrics.revenue}
           </div>
           <div className="metric-subtext">Verified Razorpay Payments</div>
@@ -347,7 +346,7 @@ export default function AdminOrdersPage() {
                           {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })},{' '}
                           {new Date(order.createdAt).toLocaleDateString()}
                         </span>
-                        <span style={{ display: 'block', fontWeight: 800, color: 'var(--accent-secondary)', marginTop: '0.25rem' }}>
+                        <span style={{ display: 'block', fontWeight: 800, color: 'var(--color-forest)', marginTop: '0.25rem' }}>
                           ₹{order.total}
                         </span>
                       </td>
@@ -426,7 +425,7 @@ export default function AdminOrdersPage() {
                             <button
                               type="button"
                               className="submit-btn"
-                              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, #3b82f6, #2563eb)' }}
+                              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, var(--color-forest), var(--color-sage))' }}
                               onClick={() => handleUpdateStatus(order._id, 'IN_KITCHEN')}
                               disabled={isUpdating}
                             >
@@ -438,7 +437,7 @@ export default function AdminOrdersPage() {
                             <button
                               type="button"
                               className="submit-btn"
-                              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                              style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem', background: 'linear-gradient(135deg, var(--color-sage), var(--color-forest))' }}
                               onClick={() => handleUpdateStatus(order._id, 'SENT_TO_DELIVERY')}
                               disabled={isUpdating}
                             >

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { API_BASE } from '../services/api';
 
 const CartContext = createContext(null);
 
@@ -13,8 +14,6 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [cartError, setCartError] = useState(null);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // Fetch cart from backend (server-authoritative)
   const fetchCart = useCallback(async () => {
@@ -43,7 +42,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, API_BASE]);
+  }, [user]);
 
   // Sync cart whenever authentication state changes
   useEffect(() => {

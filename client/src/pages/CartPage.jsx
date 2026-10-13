@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { API_BASE } from '../services/api';
 
 // Helper to load Razorpay checkout script
 const loadRazorpayScript = () => {
@@ -32,7 +33,12 @@ export default function CartPage() {
     orderData: null
   });
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  // Keep cart in sync with server when navigating to Cart page
+  useEffect(() => {
+    if (user) {
+      fetchCart();
+    }
+  }, [user, fetchCart]);
 
   // If user is not authenticated, prompt to sign in
   if (!user) {
@@ -128,6 +134,9 @@ export default function CartPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Resync cart state with backend authoritative state immediately
+        await fetchCart();
+
         if (data.insufficientItems) {
           setInsufficientItems(data.insufficientItems);
           throw new Error(data.message || 'Insufficient stock for selected ingredients');
@@ -187,7 +196,7 @@ export default function CartPage() {
           email: user.email
         },
         theme: {
-          color: '#ff6b35'
+          color: '#5C7057'
         }
       };
 
@@ -224,7 +233,17 @@ export default function CartPage() {
           <p>Synchronizing cart with server...</p>
         </div>
       ) : items.length === 0 ? (
-        <div className="card cart-empty-card">
+        <div>
+          {checkoutError && (
+            <div className="alert-banner alert-error" style={{ marginBottom: '1.5rem', maxWidth: '600px', margin: '0 auto 1.5rem auto' }}>
+              <span>⚠️</span>
+              <div>
+                <strong>Checkout Notice:</strong>
+                <p style={{ margin: 0 }}>{checkoutError}</p>
+              </div>
+            </div>
+          )}
+          <div className="card cart-empty-card">
           <span className="cart-empty-icon">🍕</span>
           <h2>Your Cart is Empty</h2>
           <p>You haven't added any delicious pizzas yet. What are you craving today?</p>
@@ -239,13 +258,14 @@ export default function CartPage() {
             <button
               type="button"
               className="submit-btn"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #3b82f6)' }}
+              style={{ background: 'linear-gradient(135deg, var(--color-forest), var(--color-sage))' }}
               onClick={() => navigate('/custom-pizza')}
             >
               ✨ Build Custom Pizza
             </button>
           </div>
         </div>
+      </div>
       ) : (
         <div className="cart-layout">
           {/* Items List Column */}
@@ -511,7 +531,7 @@ export default function CartPage() {
               <button
                 type="button"
                 className="submit-btn"
-                style={{ flex: 2, background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                style={{ flex: 2, background: 'linear-gradient(135deg, var(--color-forest), var(--color-sage))' }}
                 disabled={checkoutLoading}
                 onClick={async () => {
                   try {

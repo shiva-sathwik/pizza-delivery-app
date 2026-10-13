@@ -79,7 +79,36 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+/**
+ * Optional Authentication Middleware
+ * Attaches user to req.user if a valid token is provided; otherwise proceeds as unauthenticated
+ */
+const optionalAuthenticate = async (req, res, next) => {
+  try {
+    let token = null;
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+    if (user) {
+      req.user = user;
+    }
+    next();
+  } catch {
+    next();
+  }
+};
+
 module.exports = {
   authenticate,
-  requireAdmin
+  requireAdmin,
+  optionalAuthenticate
 };

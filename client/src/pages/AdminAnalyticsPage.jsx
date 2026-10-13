@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 export default function AdminAnalyticsPage() {
   const { user, navigate } = useAuth();
@@ -11,8 +12,6 @@ export default function AdminAnalyticsPage() {
   // Test Alert state
   const [testAlertLoading, setTestAlertLoading] = useState(false);
   const [testAlertMessage, setTestAlertMessage] = useState(null);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const fetchAnalytics = useCallback(async (selectedPeriod) => {
     if (!user || user.role !== 'admin') return;
@@ -36,7 +35,7 @@ export default function AdminAnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, API_BASE]);
+  }, [user]);
 
   useEffect(() => {
     fetchAnalytics(period);
@@ -124,7 +123,7 @@ export default function AdminAnalyticsPage() {
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
               📊 Business Analytics &amp; Insights
             </h1>
-            <span className="badge" style={{ background: 'rgba(167, 139, 250, 0.15)', color: '#c4b5fd', border: '1px solid rgba(167, 139, 250, 0.3)' }}>
+            <span className="badge" style={{ background: 'var(--color-pale-mint)', color: 'var(--color-forest)', border: '1px solid var(--color-soft-green)' }}>
               Step 8
             </span>
           </div>
@@ -348,7 +347,7 @@ export default function AdminAnalyticsPage() {
       </div>
 
       {/* Automated Low-Stock Alert System Console */}
-      <div className="card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(26, 32, 48, 0.9), rgba(20, 24, 38, 0.9))', borderColor: 'rgba(249, 115, 22, 0.3)' }}>
+      <div className="card" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(26, 32, 48, 0.9), rgba(20, 24, 38, 0.9))', borderColor: 'rgba(92, 112, 87, 0.35)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -367,7 +366,7 @@ export default function AdminAnalyticsPage() {
             style={{
               padding: '0.65rem 1.25rem',
               fontSize: '0.85rem',
-              background: 'linear-gradient(135deg, #f97316, #ea580c)',
+              background: 'linear-gradient(135deg, var(--color-forest), var(--color-sage))',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'

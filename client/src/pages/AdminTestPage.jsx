@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 export default function AdminTestPage() {
   const { user, logout, navigate } = useAuth();
@@ -7,9 +8,7 @@ export default function AdminTestPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-  const runAdminTest = async () => {
+  const runAdminTest = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -31,13 +30,13 @@ export default function AdminTestPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (user) {
       runAdminTest();
     }
-  }, [user]);
+  }, [user, runAdminTest]);
 
   if (!user) {
     return (
@@ -94,16 +93,27 @@ export default function AdminTestPage() {
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button
+            type="button"
             className="refresh-btn"
-            style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
+            style={{ background: 'var(--color-forest)', color: '#FFFFFF', border: '1px solid var(--color-forest)' }}
             onClick={() => navigate('/admin/inventory')}
           >
-            📦 Inventory Management
+            📦 Inventory Controls
           </button>
-          <button className="refresh-btn" onClick={runAdminTest} disabled={loading}>
+          <button
+            type="button"
+            className="refresh-btn"
+            onClick={runAdminTest}
+            disabled={loading}
+          >
             {loading ? 'Pinging...' : 'Test GET /api/admin/test'}
           </button>
-          <button className="refresh-btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={logout}>
+          <button
+            type="button"
+            className="refresh-btn"
+            style={{ background: 'var(--bg-subtle)', color: 'var(--text-main)', border: '1px solid var(--border-subtle)' }}
+            onClick={logout}
+          >
             Log Out
           </button>
         </div>
@@ -120,7 +130,7 @@ export default function AdminTestPage() {
           <span className="status-item-label">Role Verification</span>
           <div className="status-badge-row">
             <span className="pulse-dot online" />
-            <span className="status-value" style={{ color: '#ff6b35' }}>
+            <span className="status-value" style={{ color: 'var(--color-forest)' }}>
               ADMINISTRATOR
             </span>
           </div>
@@ -141,19 +151,36 @@ export default function AdminTestPage() {
 
       {error && <div className="alert-banner alert-error">{error}</div>}
 
-      <div className="endpoint-inspector">
-        <div className="endpoint-header">
-          <span className="endpoint-tag">
-            <span className="method-get">GET</span>
-            <span>{API_BASE}/admin/test</span>
-          </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Protected with authenticate &amp; requireAdmin
-          </span>
-        </div>
-        <pre className="json-viewer">
-          {testResult ? JSON.stringify(testResult, null, 2) : error ? error : '// Running authorization test...'}
-        </pre>
+      <div className="dashboard-actions-grid" style={{ marginTop: '1.75rem' }}>
+        <button
+          type="button"
+          className="dashboard-action-btn"
+          onClick={() => navigate('/admin/analytics')}
+        >
+          📊 Business Analytics
+        </button>
+        <button
+          type="button"
+          className="dashboard-action-btn"
+          onClick={() => navigate('/admin/inventory')}
+        >
+          📦 Manage Inventory
+        </button>
+        <button
+          type="button"
+          className="dashboard-action-btn"
+          onClick={() => navigate('/admin/orders')}
+        >
+          👨‍💼 Manage Orders
+        </button>
+        <button
+          type="button"
+          className="dashboard-action-btn secondary"
+          onClick={runAdminTest}
+          disabled={loading}
+        >
+          {loading ? '⏳ Verifying...' : '🔄 Verify Admin Status'}
+        </button>
       </div>
 
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>

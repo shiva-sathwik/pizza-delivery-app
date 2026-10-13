@@ -45,7 +45,7 @@ const areCustomPizzasEqual = (a, b) => {
  */
 const getCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
 
     let cart = await Cart.findOne({ user: userId });
 
@@ -80,7 +80,7 @@ const getCart = async (req, res) => {
  */
 const addToCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
     const { type, pizzaId, base, sauce, cheese, vegetables, quantity = 1 } = req.body;
 
     // Validate quantity
@@ -205,7 +205,7 @@ const addToCart = async (req, res) => {
  */
 const updateCartItemQuantity = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
     const { itemId } = req.params;
     const { quantity } = req.body;
 
@@ -259,7 +259,7 @@ const updateCartItemQuantity = async (req, res) => {
  */
 const removeCartItem = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
     const { itemId } = req.params;
 
     const cart = await Cart.findOne({ user: userId });
@@ -302,7 +302,7 @@ const removeCartItem = async (req, res) => {
  */
 const clearCart = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user._id || req.user.id;
 
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {

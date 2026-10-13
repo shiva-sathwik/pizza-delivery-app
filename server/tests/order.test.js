@@ -24,6 +24,8 @@
  * 20. Empty cart cannot initiate checkout (400)
  * 21. Unauthenticated access to payment verification is rejected with HTTP 401
  * 22. Non-existent order ID returns HTTP 404 for order retrieval
+ * 23. Out-of-sync cart scenario: Client displays items or passes body payload but server cart is empty (400)
+ * 24. Checkout resolves user cart using req.user.id when req.user._id is absent
  */
 
 const assert = require('assert');
@@ -416,6 +418,64 @@ async function runOrderTests() {
     assert.strictEqual(res.statusCode, 400);
     assert.strictEqual(res.jsonData.success, false);
     assert.match(res.jsonData.message, /Cart is empty/i);
+  });
+
+  await test('23. Out-of-sync cart scenario: Client displays items or passes body payload but server cart is empty (400)', async () => {
+    // Backend cart is empty for userA
+    setUserCart(userA._id, []);
+
+    // Client sends checkout request with items in body (e.g. stale client state displaying ₹399)
+    const { req, res } = createMockReqRes({
+      user: userA,
+      body: {
+        items: [
+          {
+            name: 'Rustic Farmhouse',
+            price: 399,
+            quantity: 1,
+            base: 'Pan Crust',
+            sauce: 'Classic San Marzano Tomato',
+            cheese: '100% Mozzarella'
+          }
+        ],
+        amount: 39900
+      }
+    });
+
+    await createPaymentOrder(req, res);
+    assert.strictEqual(res.statusCode, 400);
+    assert.strictEqual(res.jsonData.success, false);
+    assert.strictEqual(res.jsonData.message, 'Cart is empty. Please add items before checking out.');
+    // Must NOT create a Razorpay order or bypass validation based on client payload
+    assert.strictEqual(res.jsonData.razorpayOrderId, undefined);
+  });
+
+  await test('24. Checkout correctly resolves user cart when req.user contains id instead of _id', async () => {
+    const userWithOnlyId = {
+      id: new mongoose.Types.ObjectId(),
+      name: 'Customer With Id Only',
+      email: 'idonly@example.com',
+      role: 'user'
+    };
+
+    setUserCart(userWithOnlyId.id, [
+      {
+        name: 'Rustic Farmhouse',
+        base: 'Thin Crust',
+        sauce: 'Classic San Marzano Tomato',
+        cheese: '100% Mozzarella',
+        vegetables: ['Crisp Bell Peppers'],
+        price: 399,
+        quantity: 1
+      }
+    ]);
+
+    const { req, res } = createMockReqRes({ user: userWithOnlyId });
+    await createPaymentOrder(req, res);
+    assert.strictEqual(res.statusCode, 200);
+    assert.strictEqual(res.jsonData.success, true);
+    assert.ok(res.jsonData.razorpayOrderId);
+    assert.strictEqual(res.jsonData.amount, 39900); // ₹399 in paise
   });
 
   console.log('\n--- 2. PAYMENT SIGNATURE VERIFICATION TESTS ---');

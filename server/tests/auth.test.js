@@ -26,6 +26,7 @@ const {
 } = require('../controllers/auth.controller');
 const { adminLogin, adminTest } = require('../controllers/admin.controller');
 const User = require('../models/User');
+const emailService = require('../services/email.service');
 
 // Helper to simulate Express req/res
 const createMockReqRes = ({ body = {}, query = {}, headers = {}, cookies = {}, user = null } = {}) => {
@@ -249,6 +250,117 @@ const runTests = async () => {
     assert.match(res.jsonData.message, /invalid or expired/i);
   });
 
+  // --- SUBSECTION: EMAIL-VERIFICATION DEV SIMULATION TESTS ---
+  await test('Development mode logs generated verification URL when mock transporter is used', async () => {
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: {
+          name: 'Dev Verify User',
+          email: 'devverify@example.com',
+          password: 'password123'
+        }
+      });
+      await register(req, res);
+
+      // Verify safe API response does NOT leak verification token or url
+      assert.strictEqual(res.statusCode, 201);
+      assert.strictEqual(res.jsonData.success, true);
+      assert.strictEqual(res.jsonData.token, undefined);
+      assert.strictEqual(res.jsonData.verificationToken, undefined);
+      assert.strictEqual(res.jsonData.verificationUrl, undefined);
+      assert.strictEqual(res.jsonData.user.verificationToken, undefined);
+      assert.strictEqual(res.jsonData.user.password, undefined);
+
+      // Verify verification URL is logged to terminal in development mode
+      const devVerifyUser = await User.findOne({ email: 'devverify@example.com' });
+      assert.ok(devVerifyUser, 'Registered user must exist');
+      const verifyUrlLog = logs.find((l) => l.includes('Verification URL:'));
+      assert.ok(verifyUrlLog, 'Verification URL must be logged in dev mode');
+      assert.ok(
+        verifyUrlLog.includes(`http://localhost:5173/verify-email?token=${devVerifyUser.verificationToken}`),
+        'Logged URL must match frontend client URL and generated verification token'
+      );
+
+      // Verify token is NOT logged separately outside the URL
+      const separateTokenLog = logs.find((l) => l.trim() === devVerifyUser.verificationToken);
+      assert.strictEqual(separateTokenLog, undefined, 'Verification token must not be logged separately');
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  await test('Production mode (NODE_ENV=production) NEVER logs verification URL even with mock transporter', async () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: {
+          name: 'Prod Verify User',
+          email: 'prodverify@example.com',
+          password: 'password123'
+        }
+      });
+      await register(req, res);
+
+      assert.strictEqual(res.statusCode, 201);
+      assert.strictEqual(res.jsonData.success, true);
+      assert.strictEqual(res.jsonData.token, undefined);
+      assert.strictEqual(res.jsonData.verificationToken, undefined);
+      assert.strictEqual(res.jsonData.user.verificationToken, undefined);
+
+      const verifyUrlLog = logs.find((l) => l.includes('Verification URL:'));
+      assert.strictEqual(verifyUrlLog, undefined, 'Verification URL must NEVER be logged in production');
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+      console.log = originalLog;
+    }
+  });
+
+  await test('Configured/real SMTP transporter NEVER logs verification URL even in development mode', async () => {
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    // Simulate real/custom configured transporter
+    emailService.setCustomTransporter({
+      sendMail: async () => ({ messageId: 'real-smtp-message-verify-123' })
+    });
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: {
+          name: 'SMTP Verify User',
+          email: 'smtpverify@example.com',
+          password: 'password123'
+        }
+      });
+      await register(req, res);
+
+      assert.strictEqual(res.statusCode, 201);
+      assert.strictEqual(res.jsonData.success, true);
+
+      const verifyUrlLog = logs.find((l) => l.includes('Verification URL:'));
+      assert.strictEqual(verifyUrlLog, undefined, 'Verification URL must not be logged when real/custom SMTP is configured');
+    } finally {
+      emailService.setCustomTransporter(null); // Restore default mock transporter
+      console.log = originalLog;
+    }
+  });
+
   // ----------------------------------------------------
   // SECTION 3: LOGIN & JWT AUTHENTICATION (Step 4D)
   // ----------------------------------------------------
@@ -384,6 +496,119 @@ const runTests = async () => {
 
     const matchesNew = await bcrypt.compare('BrandNewSecurePassword123', createdUser.password);
     assert.strictEqual(matchesNew, true, 'New password must match');
+  });
+
+  // --- SUBSECTION: FORGOT-PASSWORD DEV SIMULATION TESTS ---
+  const simUser = saveToDB({
+    _id: 'sim-user-1',
+    name: 'Dev Sim User',
+    email: 'devsim@example.com',
+    password: await bcrypt.hash('simpassword123', 10),
+    role: 'user',
+    isEmailVerified: true
+  });
+
+  await test('Development mode logs generated reset URL when mock transporter is used', async () => {
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: { email: 'devsim@example.com' }
+      });
+      await forgotPassword(req, res);
+
+      // Verify generic API response is unchanged and exposes no sensitive details
+      assert.strictEqual(res.statusCode, 200);
+      assert.strictEqual(res.jsonData.success, true);
+      assert.strictEqual(
+        res.jsonData.message,
+        'If an account with that email exists, a password reset link has been sent to your inbox.'
+      );
+      assert.strictEqual(res.jsonData.token, undefined);
+      assert.strictEqual(res.jsonData.resetToken, undefined);
+      assert.strictEqual(res.jsonData.resetUrl, undefined);
+
+      // Verify reset URL is logged to terminal in development mode
+      const resetUrlLog = logs.find((l) => l.includes('Reset URL:'));
+      assert.ok(resetUrlLog, 'Reset URL must be logged in dev mode');
+      assert.ok(
+        resetUrlLog.includes(`http://localhost:5173/reset-password?token=${simUser.resetToken}`),
+        'Logged URL must match frontend client URL and generated token'
+      );
+
+      // Verify token is NOT logged separately outside the URL
+      const separateTokenLog = logs.find((l) => l.trim() === simUser.resetToken);
+      assert.strictEqual(separateTokenLog, undefined, 'Reset token must not be logged separately');
+    } finally {
+      console.log = originalLog;
+    }
+  });
+
+  await test('Production mode (NODE_ENV=production) NEVER logs reset URL even with mock transporter', async () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: { email: 'devsim@example.com' }
+      });
+      await forgotPassword(req, res);
+
+      assert.strictEqual(res.statusCode, 200);
+      assert.strictEqual(res.jsonData.success, true);
+      assert.strictEqual(
+        res.jsonData.message,
+        'If an account with that email exists, a password reset link has been sent to your inbox.'
+      );
+
+      const resetUrlLog = logs.find((l) => l.includes('Reset URL:'));
+      assert.strictEqual(resetUrlLog, undefined, 'Reset URL must NEVER be logged in production');
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+      console.log = originalLog;
+    }
+  });
+
+  await test('Configured/real SMTP transporter NEVER logs reset URL even in development mode', async () => {
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => {
+      logs.push(args.join(' '));
+    };
+
+    // Simulate real/custom configured transporter
+    emailService.setCustomTransporter({
+      sendMail: async () => ({ messageId: 'real-smtp-message-123' })
+    });
+
+    try {
+      const { req, res } = createMockReqRes({
+        body: { email: 'devsim@example.com' }
+      });
+      await forgotPassword(req, res);
+
+      assert.strictEqual(res.statusCode, 200);
+      assert.strictEqual(res.jsonData.success, true);
+      assert.strictEqual(
+        res.jsonData.message,
+        'If an account with that email exists, a password reset link has been sent to your inbox.'
+      );
+
+      const resetUrlLog = logs.find((l) => l.includes('Reset URL:'));
+      assert.strictEqual(resetUrlLog, undefined, 'Reset URL must not be logged when real/custom SMTP is configured');
+    } finally {
+      emailService.setCustomTransporter(null); // Restore default mock transporter
+      console.log = originalLog;
+    }
   });
 
   // ----------------------------------------------------

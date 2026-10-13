@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PizzaCard from '../components/PizzaCard';
+import { API_BASE } from '../services/api';
 
 export default function MenuPage() {
   const { navigate } = useAuth();
@@ -9,8 +10,6 @@ export default function MenuPage() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCrust, setSelectedCrust] = useState('ALL');
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchCatalog = async () => {
@@ -32,7 +31,7 @@ export default function MenuPage() {
     };
 
     fetchCatalog();
-  }, [API_BASE]);
+  }, []);
 
   // Extract unique crusts for filter pills
   const crustOptions = useMemo(() => {

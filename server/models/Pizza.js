@@ -51,6 +51,9 @@ const pizzaSchema = new mongoose.Schema(
   }
 );
 
+// Performance compound index for catalog retrieval and filtering
+pizzaSchema.index({ isAvailable: 1, createdAt: -1 });
+
 const Pizza = mongoose.model('Pizza', pizzaSchema);
 
 module.exports = Pizza;

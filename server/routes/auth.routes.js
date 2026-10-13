@@ -9,15 +9,16 @@ const {
   resetPassword
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
+const { authRateLimiter } = require('../middleware/rateLimiter.middleware');
 
 const router = express.Router();
 
-// Public routes
-router.post('/register', register);
+// Public routes with rate limiting on sensitive authentication operations
+router.post('/register', authRateLimiter, register);
 router.get('/verify-email', verifyEmail);
-router.post('/login', login);
+router.post('/login', authRateLimiter, login);
 router.post('/logout', logout);
-router.post('/forgot-password', forgotPassword);
+router.post('/forgot-password', authRateLimiter, forgotPassword);
 router.post('/reset-password', resetPassword);
 
 // Protected routes

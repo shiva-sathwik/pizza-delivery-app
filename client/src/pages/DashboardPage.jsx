@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { API_BASE } from '../services/api';
 
 export default function DashboardPage() {
   const { user, logout, navigate } = useAuth();
@@ -11,8 +12,6 @@ export default function DashboardPage() {
   const [popularMessage, setPopularMessage] = useState('');
   const [popularLoading, setPopularLoading] = useState(true);
   const [addedNotice, setAddedNotice] = useState(false);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
     const fetchPopularPizza = async () => {
@@ -36,12 +35,13 @@ export default function DashboardPage() {
     };
 
     fetchPopularPizza();
-  }, [API_BASE]);
+  }, []);
 
   const handleOrderPopular = async () => {
     if (!popularPizza) return;
     try {
-      await addToCart({
+      const result = await addToCart({
+        type: 'catalog',
         pizzaId: popularPizza._id,
         name: popularPizza.name,
         price: popularPizza.price,
@@ -51,11 +51,15 @@ export default function DashboardPage() {
         cheese: popularPizza.cheese || 'Mozzarella',
         vegetables: popularPizza.vegetables || ['Basil']
       });
-      setAddedNotice(true);
-      setTimeout(() => {
-        setAddedNotice(false);
-        navigate('/cart');
-      }, 800);
+      if (result && result.success) {
+        setAddedNotice(true);
+        setTimeout(() => {
+          setAddedNotice(false);
+          navigate('/cart');
+        }, 800);
+      } else {
+        navigate('/menu');
+      }
     } catch (err) {
       console.error('Failed to add popular pizza to cart:', err);
       navigate('/menu');
@@ -137,22 +141,23 @@ export default function DashboardPage() {
       {/* Step 8 Customer Recommendation Widget */}
       <div className="recommendation-widget" style={{ marginBottom: '2rem' }}>
         <div className="recommendation-card" style={{
-          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8))',
-          border: '1px solid rgba(249, 115, 22, 0.25)',
+          background: '#FFFFFF',
+          border: '1.5px solid var(--color-soft-green)',
           borderRadius: '12px',
           padding: '1.25rem 1.5rem',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          boxShadow: 'var(--shadow-sm)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1.25rem' }}>🔥</span>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>
                 Trending Recommendation
               </h3>
             </div>
             {popularPizza && (
-              <span className="badge" style={{ background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', border: '1px solid rgba(249, 115, 22, 0.4)' }}>
+              <span className="badge" style={{ background: 'var(--color-pale-mint)', color: 'var(--color-forest)', border: '1px solid var(--color-soft-green)' }}>
                 ⭐ Customer Favorite #{1} &bull; {popularOrderCount} orders
               </span>
             )}
@@ -171,29 +176,27 @@ export default function DashboardPage() {
                     height: '84px',
                     borderRadius: '10px',
                     objectFit: 'cover',
-                    border: '1px solid #334155'
+                    border: '1px solid var(--border-subtle)'
                   }}
                 />
               )}
               <div style={{ flex: 1, minWidth: '200px' }}>
-                <h4 style={{ margin: '0 0 0.25rem', fontSize: '1.05rem', color: '#f8fafc' }}>
+                <h4 style={{ margin: '0 0 0.25rem', fontSize: '1.05rem', color: 'var(--text-main)' }}>
                   {popularPizza.name}
                 </h4>
-                <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                <p style={{ margin: '0 0 0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                   {popularPizza.description || 'Deliciously crafted customer favorite, baked to perfection.'}
                 </p>
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#34d399' }}>
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--color-forest)' }}>
                   ₹{popularPizza.price}
                 </span>
               </div>
               <div>
                 <button
-                  className="submit-btn"
+                  type="button"
+                  className={`dashboard-recommend-btn ${addedNotice ? 'added' : ''}`}
                   style={{
-                    padding: '0.65rem 1.25rem',
-                    fontSize: '0.9rem',
-                    background: addedNotice ? '#10b981' : 'linear-gradient(135deg, #f97316, #ea580c)',
-                    whiteSpace: 'nowrap'
+                    background: addedNotice ? 'var(--status-online)' : 'var(--color-forest)'
                   }}
                   onClick={handleOrderPopular}
                 >
@@ -202,7 +205,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', color: '#94a3b8' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', color: 'var(--text-secondary)' }}>
               <span style={{ fontSize: '1.2rem' }}>💡</span>
               <p style={{ margin: 0, fontSize: '0.9rem' }}>
                 {popularMessage || 'Popular picks will appear after customers place orders.'}
@@ -212,37 +215,33 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="endpoint-inspector" style={{ marginTop: '1.5rem' }}>
-        <div className="endpoint-header">
-          <span className="endpoint-tag">
-            <span className="method-get">SESSION</span>
-            <span>Decoded User Profile</span>
-          </span>
-        </div>
-        <pre className="json-viewer">
-          {JSON.stringify(user, null, 2)}
-        </pre>
-      </div>
-
-      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-        <button className="submit-btn" style={{ flex: 1 }} onClick={() => navigate('/menu')}>
+      <div className="dashboard-actions-grid">
+        <button
+          type="button"
+          className="dashboard-action-btn"
+          onClick={() => navigate('/menu')}
+        >
           🍕 Order from Menu
         </button>
-        <button className="submit-btn" style={{ flex: 1, background: 'linear-gradient(135deg, #2563eb, #3b82f6)' }} onClick={() => navigate('/orders')}>
+        <button
+          type="button"
+          className="dashboard-action-btn"
+          onClick={() => navigate('/orders')}
+        >
           📋 View My Orders
         </button>
         {user.role === 'admin' && (
           <>
             <button
-              className="submit-btn"
-              style={{ flex: 1, background: 'linear-gradient(135deg, #a78bfa, #8b5cf6)' }}
+              type="button"
+              className="dashboard-action-btn"
               onClick={() => navigate('/admin/analytics')}
             >
               📊 Business Analytics
             </button>
             <button
-              className="submit-btn"
-              style={{ flex: 1, background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
+              type="button"
+              className="dashboard-action-btn"
               onClick={() => navigate('/admin/inventory')}
             >
               📦 Manage Inventory

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Ingredients', icon: '📋' },
@@ -24,8 +25,6 @@ export default function AdminInventoryPage() {
   const [savingIds, setSavingIds] = useState({});
   // Row-level feedback messages: { [id]: { type: 'success' | 'error', text: string } }
   const [rowFeedback, setRowFeedback] = useState({});
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // Fetch full inventory from backend
   const fetchInventory = useCallback(async () => {
@@ -60,7 +59,7 @@ export default function AdminInventoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [API_BASE]);
+  }, []);
 
   useEffect(() => {
     if (user && user.role === 'admin') {

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { API_BASE } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -7,8 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [currentPath, setCurrentPath] = useState(window.location.pathname + window.location.search);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   // Navigate helper with history pushState
   const navigate = useCallback((to) => {
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [API_BASE]);
+  }, []);
 
   useEffect(() => {
     checkAuth();

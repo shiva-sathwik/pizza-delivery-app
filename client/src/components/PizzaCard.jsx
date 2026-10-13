@@ -88,6 +88,7 @@ export default function PizzaCard({ pizza }) {
             className={`pizza-btn add-btn ${addedNotice ? 'btn-success' : ''}`}
             onClick={handleAddToCart}
             disabled={!pizza.isAvailable || adding || actionLoading}
+            aria-label={pizza.isAvailable ? `Add ${pizza.name} to cart` : `${pizza.name} is sold out`}
           >
             {addedNotice ? '✓ Added to Cart!' : adding ? 'Adding...' : '🛒 Add to Cart'}
           </button>
@@ -97,6 +98,7 @@ export default function PizzaCard({ pizza }) {
             className="pizza-btn customize-btn"
             onClick={handleCustomize}
             title="Create your own custom pizza"
+            aria-label={`Customize ${pizza.name}`}
           >
             ⚙️ Custom Builder
           </button>

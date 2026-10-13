@@ -92,7 +92,7 @@ const adminTest = (req, res) => {
     success: true,
     message: 'Admin authorization test passed. You have verified admin privileges.',
     admin: {
-      id: req.user._id,
+      id: req.user._id || req.user.id,
       name: req.user.name,
       email: req.user.email,
       role: req.user.role

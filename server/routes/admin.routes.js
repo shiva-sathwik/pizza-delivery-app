@@ -2,11 +2,12 @@ const express = require('express');
 const { adminLogin, adminTest } = require('../controllers/admin.controller');
 const { getAdminAnalytics, testInventoryAlert } = require('../controllers/analytics.controller');
 const { authenticate, requireAdmin } = require('../middleware/auth.middleware');
+const { authRateLimiter } = require('../middleware/rateLimiter.middleware');
 
 const router = express.Router();
 
-// Admin Login endpoint
-router.post('/login', adminLogin);
+// Admin Login endpoint with rate limiting
+router.post('/login', authRateLimiter, adminLogin);
 
 // Protected Admin Authorization Test endpoint
 router.get('/test', authenticate, requireAdmin, adminTest);

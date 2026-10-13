@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../services/api';
 
 export default function OrdersPage() {
   const { user, navigate } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
@@ -32,7 +31,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, API_BASE]);
+  }, [user]);
 
   useEffect(() => {
     fetchOrders();
@@ -138,7 +137,7 @@ export default function OrdersPage() {
             <button
               type="button"
               className="submit-btn"
-              style={{ background: 'linear-gradient(135deg, #2563eb, #3b82f6)' }}
+              style={{ background: 'var(--color-sage)' }}
               onClick={() => navigate('/custom-pizza')}
             >
               ✨ Build Custom Pizza

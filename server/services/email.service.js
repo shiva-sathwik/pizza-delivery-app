@@ -36,11 +36,18 @@ const getTransporter = () => {
 
   // Development fallback: simulated transporter that logs message delivery safely
   return {
+    isMock: true,
     sendMail: async (mailOptions) => {
       console.log(`[EmailService] SMTP credentials not set. Simulated email dispatch to: ${mailOptions.to}`);
       console.log(`[EmailService] Subject: ${mailOptions.subject}`);
       // Safely do not print secrets or tokens in production logs
       if (process.env.NODE_ENV !== 'production') {
+        if (mailOptions.verificationUrl) {
+          console.log(`[EmailService] (Dev Mode) Verification URL: ${mailOptions.verificationUrl}`);
+        }
+        if (mailOptions.resetUrl) {
+          console.log(`[EmailService] (Dev Mode) Reset URL: ${mailOptions.resetUrl}`);
+        }
         console.log(`[EmailService] (Dev Mode) Delivery simulation completed.`);
       }
       return { messageId: `mock-${Date.now()}` };
@@ -86,7 +93,8 @@ const sendVerificationEmail = async ({ to, name, token }) => {
           If you didn't create a PizzaFlow account, you can safely ignore this email.
         </p>
       </div>
-    `
+    `,
+    verificationUrl
   };
 
   const transporter = getTransporter();
@@ -131,7 +139,8 @@ const sendPasswordResetEmail = async ({ to, name, token }) => {
           If you did not request a password reset, please ignore this email. Your password will remain unchanged.
         </p>
       </div>
-    `
+    `,
+    resetUrl
   };
 
   const transporter = getTransporter();
